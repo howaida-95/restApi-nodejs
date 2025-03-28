@@ -1,0 +1,16 @@
+steps 
+-----------
+==> express
+==> nodemon ==> to avoid restart server manually after every change 
++ adding scripts in package.json 
+
+==> body-parser
+to parse incoming request body 
+
+==> adding routes (using express router)
+- create routes folder
+- define routes (and connect it with logic in controller)
+- register these routes in app.js
+
+==> controller 
+holding the logic for each request

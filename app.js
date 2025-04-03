@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 // Import the feed routes from the routes directory
 const feedRoutes = require("./routes/feed");
+// import the mongoose library for MongoDB object modeling
+const mongoose = require("mongoose");
 
 // Create an instance of an Express application
 const app = express();
@@ -26,11 +28,22 @@ app.use((req, res, next) => {
   next(); // Call the next middleware or route handler
 });
 app.use("/feed", feedRoutes);
+// Connect to MongoDB using Mongoose
+mongoose
+  .connect(
+    "mongodb+srv://howaidasayed95:1751995@restapi.7v1ba.mongodb.net/?retryWrites=true&w=majority&appName=firstapi",
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
+  .then(() => {
+    // Start the server and listen on the specified port
+    // The callback function logs a message when the server starts successfully
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+    console.log("Connected to MongoDB successfully!");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
 // Define the port number the server will listen on
 const PORT = 8080;
-
-// Start the server and listen on the specified port
-// The callback function logs a message when the server starts successfully
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});

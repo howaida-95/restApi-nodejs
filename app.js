@@ -30,10 +30,10 @@ app.use((req, res, next) => {
 app.use("/feed", feedRoutes);
 // Connect to MongoDB using Mongoose
 mongoose
-  .connect(
-    "mongodb+srv://howaidasayed95:1751995@restapi.7v1ba.mongodb.net/?retryWrites=true&w=majority&appName=firstapi",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect("mongodb+srv://howaidasayed95:1751995@firstapi.7v1ba.mongodb.net", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     // Start the server and listen on the specified port
     // The callback function logs a message when the server starts successfully

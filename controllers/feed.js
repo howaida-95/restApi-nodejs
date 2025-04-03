@@ -1,3 +1,5 @@
+const { validationResult } = require("express-validator");
+
 exports.getPosts = async (req, res, next) => {
   // send response
   res.status(200).json({
@@ -17,6 +19,13 @@ exports.getPosts = async (req, res, next) => {
 };
 
 exports.createPost = async (req, res, next) => {
+  // handle errors
+  const errors = validationResult(req); // check if there are any validation errors
+  if (!errors.isEmpty()) {
+    // 422 is the status code for unprocessable entity (validation error)
+    // send error response
+    return res.status(422).json({ message: "Validation failed, entered data is incorrect", errors: errors.array() });
+  }
   // parse data from incoming request
   const title = req.body.title;
   const content = req.body.content;
@@ -29,7 +38,15 @@ exports.createPost = async (req, res, next) => {
   // send response
   res.status(201).json({
     message: "Post created successfully",
-    post: { id: new Date().toISOString(), title, content },
+    post: {
+      _id: new Date().toISOString(),
+      title,
+      content,
+      creator: {
+        name: "Ahmed",
+      },
+      createdAt: new Date(),
+    },
   });
 };
 

@@ -14,3 +14,11 @@ to parse incoming request body
 
 ==> controller 
 holding the logic for each request
+
+==> express validator 
+implement validation for incoming request data in node js apps 
+### used inside 
+-> routes (import body to validate incoming request)
+-> controllers (using validationResult function to validate data)
+ - to validate data before processing it
+ - to return error message if validation fails

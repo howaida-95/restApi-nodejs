@@ -2,9 +2,16 @@ exports.getPosts = async (req, res, next) => {
   // send response
   res.status(200).json({
     posts: [
-      { title: "First Post", content: "This is the first post" },
-      { title: "Second Post", content: "This is the second post" },
-      { title: "Third Post", content: "This is the third post" },
+      {
+        _id: "1",
+        title: "First Post",
+        content: "This is the first post",
+        imageUrl: "images/model1.png",
+        creator: {
+          name: "Omar",
+        },
+        createdAt: new Date(),
+      },
     ],
   });
 };
@@ -32,4 +39,3 @@ notes
 no res.render(view)
 because rest api returns json data not views
 */
-// 5:35

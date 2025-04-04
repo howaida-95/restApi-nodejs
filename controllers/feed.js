@@ -25,7 +25,9 @@ exports.createPost = async (req, res, next) => {
   if (!errors.isEmpty()) {
     // 422 is the status code for unprocessable entity (validation error)
     // send error response
-    return res.status(422).json({ message: "Validation failed, entered data is incorrect", errors: errors.array() });
+    const error = new Error("Validation failed, entered data is incorrect.");
+    error.statusCode = 422; // set the status code
+    throw error; // throw the error to be handled by the error handling middleware
   }
   // parse data from incoming request
   const title = req.body.title;
@@ -55,7 +57,10 @@ exports.createPost = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      if (!err.statusCode) {
+        err.statusCode = 500; // internal server error
+      }
+      next(err); // pass the error to the error handling middleware
     });
 };
 

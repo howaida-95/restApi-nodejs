@@ -30,3 +30,8 @@ implement validation for incoming request data in node js apps
 
 ==> models folder 
 to define structure of data in db (schema)
+
+==> in app.js
+- set up static serving of my images folder using built-in express middleware --> express.static()
+- setting up a general error handling middleware to catch and handle any error that occurs in the app
+after all routes

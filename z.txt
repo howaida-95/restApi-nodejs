@@ -4,8 +4,12 @@ steps
 ==> nodemon ==> to avoid restart server manually after every change 
 + adding scripts in package.json 
 
-==> body-parser
+==> body-parser (app.js) 
 to parse incoming request body 
+==> multer (app.js & controller)
+to handle multipart/form-data requests (file upload)
+# file storage config (destination & filename)
+# fileFilter (to prevent uploading of certain file types)
 
 ==> adding routes (using express router)
 - create routes folder

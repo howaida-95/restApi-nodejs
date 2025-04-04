@@ -3,6 +3,7 @@ const path = require("path"); // Import the path module for handling file and di
 const express = require("express");
 // Import the body-parser middleware for parsing request bodies
 const bodyParser = require("body-parser");
+const multer = require("multer"); // Import the multer middleware for handling file uploads
 // Import the feed routes from the routes directory
 const feedRoutes = require("./routes/feed");
 // import the mongoose library for MongoDB object modeling
@@ -10,6 +11,38 @@ const mongoose = require("mongoose");
 
 // Create an instance of an Express application
 const app = express();
+/*
+Configure multer for file uploads
+=> multer is a middleware for handling multipart/form-data, which is used for uploading files.
+=> The diskStorage() method is used to configure the storage engine for multer.
+=> It allows you to control the destination and filename of the uploaded files.
+=> The destination option specifies the folder where the uploaded files will be stored.
+=> The filename option specifies the name of the file after it is uploaded.
+=> In this case, we are using the current date and time as a prefix for the filename to ensure uniqueness.
+=> The original filename is appended to the date string.
+=> The cb() function is a callback function that multer calls to indicate that the file has been processed.
+=> The first argument is an error (if any), and the second argument is the destination or filename.
+=> In this case, we are passing null for the error and the destination and filename as the second argument.
+=> The multer middleware will then handle the file upload and store it in the specified location.
+=> The uploaded files will be accessible in the "images" directory.
+*/
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images"); // Set the destination folder for uploaded files
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + "-" + file.originalname); // Set the filename for the uploaded file
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  // Check the file type and allow only images (jpg, jpeg, png)
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "image/jpg") {
+    cb(null, true); // Accept the file
+  } else {
+    cb(null, false); // Reject the file
+  }
+};
 /* Parse incoming JSON requests and put the parsed data in req.body
 The urlencoded() method is used to parse URL-encoded data 
 (usually from HTML form submissions with application/x-www-form-urlencoded content type).
@@ -18,6 +51,9 @@ The urlencoded() method is used to parse URL-encoded data
 app.use(bodyParser.urlencoded());
 */
 app.use(bodyParser.json()); // Parse incoming JSON requests and put the parsed data in req.body
+// register the multer middleware for handling file uploads
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")); // Handle single file uploads with the field name "image"
+
 app.use("/images", express.static(path.join(__dirname, "images"))); // Serve static files from the "images" directory
 /*
 before forward the requests to the routes
@@ -40,7 +76,6 @@ app.use((error, req, res, next) => {
   // Send the error response with the status code and error message
   res.status(status).json({ message: error.message });
 });
-
 
 // Connect to MongoDB using Mongoose
 mongoose

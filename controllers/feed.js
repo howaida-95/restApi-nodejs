@@ -102,10 +102,10 @@ exports.updatePost = async (req, res, next) => {
     throw error; // throw the error to be handled by the error handling middleware
   }
 
-  let imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes for cross-platform compatibility
+  let imageUrl = req.body.imag;
   // parse data from incoming request
   const title = req.body.title;
-  const content = req.body.image;
+  const content = req.body.content;
 
   // check if the request has a file (image) attached
   if (req.file) {

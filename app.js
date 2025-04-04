@@ -31,7 +31,9 @@ const fileStorage = multer.diskStorage({
     cb(null, "images"); // Set the destination folder for uploaded files
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "-" + file.originalname); // Set the filename for the uploaded file
+    // Set the filename for the uploaded file
+    // : --> not allowed in the filename so we replace it with -
+    cb(null, new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname);
   },
 });
 
@@ -50,9 +52,9 @@ The urlencoded() method is used to parse URL-encoded data
 ==> we don't need this for now we don't use form data we will use json data instead 
 app.use(bodyParser.urlencoded());
 */
-app.use(bodyParser.json()); // Parse incoming JSON requests and put the parsed data in req.body
 // register the multer middleware for handling file uploads
 app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")); // Handle single file uploads with the field name "image"
+app.use(bodyParser.json()); // Parse incoming JSON requests and put the parsed data in req.body
 
 app.use("/images", express.static(path.join(__dirname, "images"))); // Serve static files from the "images" directory
 /*

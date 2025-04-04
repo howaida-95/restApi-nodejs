@@ -28,6 +28,12 @@ implement validation for incoming request data in node js apps
 - create models (schema) to define structure of data in db
 - use models to interact with db (CRUD operations)
 
+# save 
+# findById
+# update
+# delete
+# find
+
 ==> models folder 
 to define structure of data in db (schema)
 

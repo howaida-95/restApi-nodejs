@@ -33,6 +33,7 @@ implement validation for incoming request data in node js apps
 - use models to interact with db (CRUD operations)
 
 # save 
+create & update (findById + save)
 # findById
 # update
 # delete

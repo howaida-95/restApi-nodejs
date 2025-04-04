@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
-
+const fs = require("fs"); // file system module to delete files
+const path = require("path"); // path module to handle file paths
 exports.getPosts = async (req, res, next) => {
   // fetch data from database (simulated here with a console log)
   Post.find()
@@ -16,7 +17,6 @@ exports.getPosts = async (req, res, next) => {
 };
 
 exports.createPost = async (req, res, next) => {
-  console.log("wooooooooooooooooooooow called", req); // log the request for debugging
   // handle errors
   const errors = validationResult(req); // check if there are any validation errors
   if (!errors.isEmpty()) {
@@ -89,6 +89,83 @@ exports.getPost = async (req, res, next) => {
       }
       next(err); // pass the error to the error handling middleware
     });
+};
+
+exports.updatePost = async (req, res, next) => {
+  const postId = req.params.postId; // get the post id from the request parameters
+  const errors = validationResult(req); // check if there are any validation errors
+  if (!errors.isEmpty()) {
+    // 422 is the status code for unprocessable entity (validation error)
+    // send error response
+    const error = new Error("Validation failed, entered data is incorrect.");
+    error.statusCode = 422; // set the status code
+    throw error; // throw the error to be handled by the error handling middleware
+  }
+
+  let imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes for cross-platform compatibility
+  // parse data from incoming request
+  const title = req.body.title;
+  const content = req.body.image;
+
+  // check if the request has a file (image) attached
+  if (req.file) {
+    // get the image URL from the request file
+    /*
+    if no image uplaoded then use the old image URL from the database
+    if image uploaded then use the new image URL from the request file
+    */
+    imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes for cross-platform compatibility
+  }
+  if (!imageUrl) {
+    // send error response
+    const error = new Error("No image provided.");
+    error.statusCode = 422; // unprocessable entity
+    throw error; // throw the error to be handled by the error handling middleware
+  }
+  // parse data from incoming request
+  // validate data
+  if (!title || !content) {
+    // send error response
+    return res.status(422).json({ message: "Invalid input" });
+  }
+  Post.findById(postId) // find the post by id in the database
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404; // not found
+        throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
+      }
+      if (imageUrl !== post.imageUrl) {
+        // if the image URL has changed (new image uploaded)
+        clearImage(post.imageUrl); // delete the old image from the server
+      }
+      post.title = title; // update post title with new title from request body
+      post.content = content; // update post content with new content from request body
+      post.imageUrl = imageUrl; // update post image URL with new image URL from request file
+
+      // save updated post to database
+      return post.save(); // save updated post to database and return it as a promise
+    })
+    .then((result) => {
+      res.status(200).json({ message: "Post updated successfully", post: result }); // send success response with updated post data
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500; // internal server error
+      } // pass the error to the error handling middleware
+      next(err); // pass the error to the error handling middleware
+    });
+};
+
+/* delete image handler
+trigger this function when uploaded image is updated or deleted
+this function will delete the old image from the server
+*/
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, "..", filePath); // join the directory name with the file path
+  fs.unlink(filePath, (err) => {
+    console.log(err); // log any error that occurs while deleting the file
+  });
 };
 
 /*

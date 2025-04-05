@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 const multer = require("multer"); // Import the multer middleware for handling file uploads
 // Import the feed routes from the routes directory
 const feedRoutes = require("./routes/feed");
+// Import the auth routes from the routes directory
+const authRoutes = require("./routes/auth");
 // import the mongoose library for MongoDB object modeling
 const mongoose = require("mongoose");
 
@@ -68,6 +70,7 @@ app.use((req, res, next) => {
   next(); // Call the next middleware or route handler
 });
 app.use("/feed", feedRoutes);
+app.use("/auth", authRoutes); // Use the auth routes for authentication-related requests
 
 // Error handling middleware to catch errors and send a response
 app.use((error, req, res, next) => {

@@ -76,10 +76,12 @@ app.use("/auth", authRoutes); // Use the auth routes for authentication-related 
 app.use((error, req, res, next) => {
   // Set the response status code to the error's status code or 500 if not set
   const status = error.statusCode || 500;
+  const message = error.message || "An error occurred!";
+  const data = error.data || null; // Get the error data if available
   // Set the response content type to JSON
   res.setHeader("Content-Type", "application/json");
   // Send the error response with the status code and error message
-  res.status(status).json({ message: error.message });
+  res.status(status).json({ message: message, data: data });
 });
 
 // Connect to MongoDB using Mongoose

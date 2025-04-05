@@ -33,7 +33,7 @@ implement validation for incoming request data in node js apps
 - use models to interact with db (CRUD operations)
 
 # save 
-create & update (findById + save)
+create (new ModelName ({}.save)) & update (findById + save)
 # findById
 # update
 # findByIdAndDelete (for delete)
@@ -42,7 +42,7 @@ create & update (findById + save)
 find().countDocuments() ---> define how many documents
 find().skip() --> skip first n documents
 find().limit() --> limit to n documents
-
+findOne({}) --> find one document (filter by specific field)
 ==> models folder 
 to define structure of data in db (schema)
 

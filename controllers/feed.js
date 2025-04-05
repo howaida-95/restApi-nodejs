@@ -102,7 +102,7 @@ exports.updatePost = async (req, res, next) => {
     throw error; // throw the error to be handled by the error handling middleware
   }
 
-  let imageUrl = req.body.imag;
+  let imageUrl = req.body.image;
   // parse data from incoming request
   const title = req.body.title;
   const content = req.body.content;
@@ -148,6 +148,29 @@ exports.updatePost = async (req, res, next) => {
     })
     .then((result) => {
       res.status(200).json({ message: "Post updated successfully", post: result }); // send success response with updated post data
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500; // internal server error
+      } // pass the error to the error handling middleware
+      next(err); // pass the error to the error handling middleware
+    });
+};
+
+exports.deletePost = async (req, res, next) => {
+  const postId = req.params.postId; // get the post id from the request parameters
+  Post.findById(postId) // find the post by id in the database
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404; // not found
+        throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
+      }
+      clearImage(post.imageUrl); // delete the image from server
+      return Post.findByIdAndDelete(postId); // delete the post from database and return it as a promise
+    })
+    .then((result) => {
+      res.status(200).json({ message: "Post deleted successfully", post: result }); // send success response with deleted post data
     })
     .catch((err) => {
       if (!err.statusCode) {

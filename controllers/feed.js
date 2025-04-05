@@ -3,10 +3,24 @@ const Post = require("../models/post");
 const fs = require("fs"); // file system module to delete files
 const path = require("path"); // path module to handle file paths
 exports.getPosts = async (req, res, next) => {
-  // fetch data from database (simulated here with a console log)
-  Post.find()
+  const currentPage = req.query.page || 1; // get the current page from the query string or default to 1
+  const perPage = 2; // number of posts per page
+  let totalItems; // variable to store total number of posts
+
+  Post.find() // find all posts in the database
+    .countDocuments() // count the total number of posts in the database
+    .then((count) => {
+      totalItems = count; // set the total number of posts
+      return Post.find() // find all posts in the database
+        .skip((currentPage - 1) * perPage) // skip the posts that are already displayed on previous pages
+        .limit(perPage); // limit the number of posts to be displayed on the current page
+    })
     .then((posts) => {
-      res.status(200).json({ message: "Fetched posts successfully.", posts: posts }); // send the posts data as a response
+      res.status(200).json({
+        message: "Fetched posts successfully.",
+        posts: posts,
+        totalItems: totalItems, // send the total number of posts as a response
+      });
     })
     .catch((err) => {
       if (!err.statusCode) {

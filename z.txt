@@ -10,15 +10,6 @@ to parse incoming request body
 to handle multipart/form-data requests (file upload)
 # file storage config (destination & filename)
 # fileFilter (to prevent uploading of certain file types)
-
-==> adding routes (using express router)
-- create routes folder
-- define routes (and connect it with logic in controller)
-- register these routes in app.js
-
-==> controller 
-holding the logic for each request
-
 ==> express validator 
 implement validation for incoming request data in node js apps 
 ### used inside 
@@ -32,6 +23,18 @@ used for hashing passwords in node js apps
 so not stored in plain text in db
 bcrypt.hash() ==> for hashing password in signup 
 bcrypt.compare(entered password, stored password) ==> for comparing password in login
+
+==> jsonwebtoken
+used for generating and verifying JWT tokens in node js apps
+
+
+==> adding routes (using express router)
+- create routes folder
+- define routes (and connect it with logic in controller)
+- register these routes in app.js
+
+==> controller 
+holding the logic for each request
 
 ==> database (nosql --> mongodb --> mongoose )
 - connect to db using connection url if successful connection ==> run server 

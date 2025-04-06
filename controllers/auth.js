@@ -1,8 +1,8 @@
 const User = require("../models/user");
 const { validationResult } = require("express-validator"); // for validating request data
 const bcrypt = require("bcryptjs"); // for hashing passwords
-// const jwt = require("jsonwebtoken"); // for generating JWT tokens
-// const crypto = require("crypto"); // for generating random tokens
+const jwt = require("jsonwebtoken"); // for generating JWT tokens
+const crypto = require("crypto"); // for generating random tokens
 // const nodemailer = require("nodemailer"); // for sending emails
 
 exports.signup = async (req, res, next) => {
@@ -44,4 +44,49 @@ exports.signup = async (req, res, next) => {
     next(err); // Pass the error to the error handling middleware
   }
 };
-exports.login = async (req, res, next) => {};
+exports.login = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
+    const errors = validationResult(req); // Finds the most relevant validation error
+    if (!errors.isEmpty()) {
+      const error = new Error("Validation failed, entered data is incorrect.");
+      error.statusCode = 422; // Unprocessable Entity
+      error.data = errors.array(); // Add validation errors to the error object(keeps track of the errors)
+      throw error;
+    }
+    let loadedUser;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      const error = new Error("A user with this email could not be found.");
+      error.statusCode = 401; // Unauthorized
+      throw error;
+    }
+    loadedUser = user;
+    const isEqual = await bcrypt.compare(password, user.password); // Compare the entered password with the hashed password in the database
+    if (!isEqual) {
+      const error = new Error("Wrong password!");
+      error.statusCode = 401; // Unauthorized
+      throw error;
+    }
+    // Generate a JWT token if the login is successful
+    // The token contains the user's email and userId, signed with a secret key
+    const token = jwt.sign(
+      {
+        email: loadedUser.email,
+        userId: loadedUser._id.toString(),
+      },
+      "somesupersecretsecret", // Secret key for signing the token
+      { expiresIn: "1h" } // Token expiration time
+    );
+    res.status(200).json({
+      token: token,
+      userId: loadedUser._id.toString(),
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500; // Internal Server Error
+    }
+    next(err); // Pass the error to the error handling middleware
+  }
+};

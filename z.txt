@@ -26,9 +26,12 @@ implement validation for incoming request data in node js apps
 -> controllers (using validationResult function to validate data)
  - to validate data before processing it
  - to return error message if validation fails
+
 ==> bcryptjs 
 used for hashing passwords in node js apps
 so not stored in plain text in db
+bcrypt.hash() ==> for hashing password in signup 
+bcrypt.compare(entered password, stored password) ==> for comparing password in login
 
 ==> database (nosql --> mongodb --> mongoose )
 - connect to db using connection url if successful connection ==> run server 

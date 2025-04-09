@@ -62,6 +62,7 @@ app.use("/images", express.static(path.join(__dirname, "images"))); // Serve sta
 /*
 before forward the requests to the routes
 => add headers to allow cross-origin requests
+an Express.js middleware that sets up CORS (Cross-Origin Resource Sharing) headers to allow cross-origin HTTP requests
  */
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Allow requests from any origin

@@ -25,7 +25,9 @@ bcrypt.hash() ==> for hashing password in signup
 bcrypt.compare(entered password, stored password) ==> for comparing password in login
 
 ==> jsonwebtoken
-used for generating and verifying JWT tokens in node js apps
+- in login controller ==> generate token and send it back to client
+- in auth middleware ==> verify token and check if it's valid or not 
+- in routes -->  use this middleware function in routes that require authentication
 
 
 ==> adding routes (using express router)

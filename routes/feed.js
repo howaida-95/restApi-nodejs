@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const router = express.Router();
 const feedController = require("../controllers/feed");
+const isAuth = require("../middleware/is-auth");
 const { getPosts, createPost, getPost, updatePost, deletePost } = feedController;
 
 // define some routes
@@ -15,7 +16,7 @@ router.post(
 );
 
 // /feed/posts ==> because we register the router with /feed in app.js
-router.get("/posts", getPosts);
+router.get("/posts", isAuth, getPosts);
 
 router.get("/post/:postId", getPost); // get a single post by id
 

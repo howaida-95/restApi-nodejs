@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const router = express.Router();
+const router = express.Router(); 
 const feedController = require("../controllers/feed");
 const isAuth = require("../middleware/is-auth");
 const { getPosts, createPost, getPost, updatePost, deletePost } = feedController;

@@ -21,6 +21,7 @@ const userSchema = new Schema({
     type: String,
     default: "I am new!",
   },
+  /* link between posts & user */
   posts: [
     {
       type: Schema.Types.ObjectId, // reference to the post model

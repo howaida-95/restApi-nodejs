@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Post = require("../models/post");
+const User = require("../models/user");
 const fs = require("fs"); // file system module to delete files
 const path = require("path"); // path module to handle file paths
 exports.getPosts = async (req, res, next) => {
@@ -53,28 +54,42 @@ exports.createPost = async (req, res, next) => {
   // parse data from incoming request
   const title = req.body.title;
   const content = req.body.content;
+  let creator;
   // validate data
   if (!title || !content) {
     // send error response
     return res.status(422).json({ message: "Invalid input" });
   }
+
   // save data to database (simulated here with a console log)
   // send response
+  // Creates a new Post document
   const post = new Post({
     title: title,
     content: content,
     imageUrl: imageUrl, // use the image URL from the request file
-    creator: {
-      name: "Ahmed",
-    },
+    creator: req.userId,
   });
   post
     .save()
+    .then((result) => {
+      /*
+      add the post to the user's posts array in the database
+      */
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      // updating user then save it to db
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
     .then((result) => {
       console.log(result);
       res.status(201).json({
         message: "Post created successfully",
         post: result,
+        creator: { _id: creator._id, name: creator.name },
       });
     })
     .catch((err) => {

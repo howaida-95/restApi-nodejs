@@ -19,15 +19,16 @@ const postSchema = new Schema(
       type: String,
       required: true,
     },
-    //   creator: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "User", // linked to a user
-    //     required: true,
-    //   },
+    /* now there's a relation between post & user */
     creator: {
-      type: Object,
+      type: Schema.Types.ObjectId,
+      ref: "User", // linked to a user
       required: true,
     },
+    // creator: {
+    //   type: Object,
+    //   required: true,
+    // },
   },
   {
     /* so mongoose will automatically add time when new post added

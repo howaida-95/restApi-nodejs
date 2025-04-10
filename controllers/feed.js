@@ -85,10 +85,10 @@ exports.createPost = async (req, res, next) => {
       return user.save();
     })
     .then((result) => {
-      console.log(result);
+      console.log(result); // result here is the user
       res.status(201).json({
         message: "Post created successfully",
-        post: result,
+        post: post,
         creator: { _id: creator._id, name: creator.name },
       });
     })

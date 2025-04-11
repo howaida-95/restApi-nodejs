@@ -47,7 +47,7 @@ holding the logic for each request
 create (new ModelName ({}.save)) & update (findById + save)
 # findById
 # update
-# findByIdAndDelete (for delete)
+# findByIdAndDelete (for delete) + pull (for delete from array to clear the relation)
 # find 
 (lists + pagination)
 find().countDocuments() ---> define how many documents

@@ -211,6 +211,14 @@ exports.deletePost = async (req, res, next) => {
 
       return Post.findByIdAndDelete(postId); // delete the post from database and return it as a promise
     })
+    .then(() => {
+      // clear the relation between post & user (pull ref in user model)
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      user.posts.pull(postId); // remove the post from the user's posts array
+      return user.save(); // save the updated user to database
+    })
     .then((result) => {
       res.status(200).json({ message: "Post deleted successfully", post: result }); // send success response with deleted post data
     })

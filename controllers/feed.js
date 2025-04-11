@@ -3,6 +3,7 @@ const Post = require("../models/post");
 const User = require("../models/user");
 const fs = require("fs"); // file system module to delete files
 const path = require("path"); // path module to handle file paths
+
 exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1; // get the current page from the query string or default to 1
   const perPage = 2; // number of posts per page
@@ -164,6 +165,12 @@ exports.updatePost = async (req, res, next) => {
         error.statusCode = 404; // not found
         throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error("Not authorized");
+        error.statusCode = 403; // forbidden
+        throw error; // throw the error to be handled by the error handling middleware
+      }
+
       if (imageUrl !== post.imageUrl) {
         // if the image URL has changed (new image uploaded)
         clearImage(post.imageUrl); // delete the old image from the server
@@ -195,7 +202,13 @@ exports.deletePost = async (req, res, next) => {
         error.statusCode = 404; // not found
         throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
       }
+      if (post.creator.toString() !== req.userId) {
+        const error = new Error("Not authorized");
+        error.statusCode = 403; // forbidden
+        throw error; // throw the error to be handled by the error handling middleware
+      }
       clearImage(post.imageUrl); // delete the image from server
+
       return Post.findByIdAndDelete(postId); // delete the post from database and return it as a promise
     })
     .then((result) => {

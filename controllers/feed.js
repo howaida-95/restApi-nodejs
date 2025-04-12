@@ -9,27 +9,27 @@ exports.getPosts = async (req, res, next) => {
   const perPage = 2; // number of posts per page
   let totalItems; // variable to store total number of posts
 
-  Post.find() // find all posts in the database
-    .countDocuments() // count the total number of posts in the database
-    .then((count) => {
-      totalItems = count; // set the total number of posts
-      return Post.find() // find all posts in the database
-        .skip((currentPage - 1) * perPage) // skip the posts that are already displayed on previous pages
-        .limit(perPage); // limit the number of posts to be displayed on the current page
-    })
-    .then((posts) => {
-      res.status(200).json({
-        message: "Fetched posts successfully.",
-        posts: posts,
-        totalItems: totalItems, // send the total number of posts as a response
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500; // internal server error
-      }
-      next(err); // pass the error to the error handling middleware
+  try {
+    const count = await Post.find().countDocuments(); // find all posts in the database & count the total number of posts in the database
+    totalItems = count; // set the total number of posts
+    // find all posts in the database
+    // skip the posts that are already displayed on previous pages
+    // limit the number of posts to be displayed on the current page
+    // note --> .exec (return a promise)
+    const posts = await Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    res.status(200).json({
+      message: "Fetched posts successfully.",
+      posts: posts,
+      totalItems: totalItems, // send the total number of posts as a response
     });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500; // internal server error
+    }
+    next(err); // pass the error to the error handling middleware
+  }
 };
 
 exports.createPost = async (req, res, next) => {

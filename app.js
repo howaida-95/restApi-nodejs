@@ -99,7 +99,12 @@ mongoose
     => store the server in the function returned by socket io 
     => websocket is built on top of http protocol
     */
-    const io = require("socket.io")(server);
+    const io = require("socket.io")(server, {
+      cors: {
+        origin: "*", // or specific domain like "http://localhost:3000"
+        methods: ["GET", "POST"],
+      },
+    });
     // we can use it on couple of event listeners
     io.on("connection", (socket) => {
       // socket is the connection between client & server

@@ -63,8 +63,13 @@ to define structure of data in db (schema)
 after all routes
 - setting up routes (using express router) for https request --> app.use("route name - optional ", route file)
 - setting up socket io channels for real time communication (websocket protocol)
-    set up when listen to port (server.listen())
+    set up when listen to port (server.listen()) --> in server 
+    note
+    ----
+    socket.io-client --> to handle websocket connection on client side
+    socket.io --> to handle websocket connection on server side
     
+
 
 =================================================================================
 test/id --> id is param (part of path, identify resource)

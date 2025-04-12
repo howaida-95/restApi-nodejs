@@ -246,4 +246,6 @@ notes
 ======
 no res.render(view)
 because rest api returns json data not views
+*********************************************
+inform all connected clients with a new host 
 */

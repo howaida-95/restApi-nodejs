@@ -94,11 +94,18 @@ mongoose
   .then(() => {
     // Start the server and listen on the specified port
     // The callback function logs a message when the server starts successfully
-    const PORT = 8080;
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+    const server = app.listen(8080);
+    /* setting up socket io
+    => store the server in the function returned by socket io 
+    => websocket is built on top of http protocol
+    */
+    const io = require("socket.io")(server);
+    // we can use it on couple of event listeners
+    io.on("connection", (socket) => {
+      // socket is the connection between client & server
+      // this function will executed
+      console.log("Client connected");
     });
-    console.log("Connected to MongoDB successfully!");
   })
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);

@@ -61,7 +61,11 @@ to define structure of data in db (schema)
 - set up static serving of my images folder using built-in express middleware --> express.static()
 - setting up a general error handling middleware to catch and handle any error that occurs in the app
 after all routes
+- setting up routes (using express router) for https request --> app.use("route name - optional ", route file)
+- setting up socket io channels for real time communication (websocket protocol)
+    set up when listen to port (server.listen())
+    
 
-================================
+=================================================================================
 test/id --> id is param (part of path, identify resource)
 test?id=1 --> id is query param (query string, filter data or search or pagination ...etc)

@@ -19,6 +19,7 @@ exports.getPosts = async (req, res, next) => {
     // note --> .exec (return a promise)
     const posts = await Post.find()
       .populate("creator")
+      .sort({ createdAt: -1 }) // sort by createAt data in descending (newest -> oldest)
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 

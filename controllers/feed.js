@@ -196,40 +196,48 @@ exports.updatePost = async (req, res, next) => {
 };
 
 exports.deletePost = async (req, res, next) => {
-  const postId = req.params.postId; // get the post id from the request parameters
-  Post.findById(postId) // find the post by id in the database
-    .then((post) => {
-      if (!post) {
-        const error = new Error("Could not find post.");
-        error.statusCode = 404; // not found
-        throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
-      }
-      if (post.creator.toString() !== req.userId) {
-        const error = new Error("Not authorized");
-        error.statusCode = 403; // forbidden
-        throw error; // throw the error to be handled by the error handling middleware
-      }
-      clearImage(post.imageUrl); // delete the image from server
+  const postId = req.params.postId;
 
-      return Post.findByIdAndDelete(postId); // delete the post from database and return it as a promise
-    })
-    .then(() => {
-      // clear the relation between post & user (pull ref in user model)
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      user.posts.pull(postId); // remove the post from the user's posts array
-      return user.save(); // save the updated user to database
-    })
-    .then((result) => {
-      res.status(200).json({ message: "Post deleted successfully", post: result }); // send success response with deleted post data
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500; // internal server error
-      } // pass the error to the error handling middleware
-      next(err); // pass the error to the error handling middleware
+  try {
+    // Find the post by id
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      const error = new Error("Could not find post.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check authorization
+    if (post.creator.toString() !== req.userId) {
+      const error = new Error("Not authorized");
+      error.statusCode = 403;
+      throw error;
+    }
+    // Delete the image from server
+    clearImage(post.imageUrl);
+
+    // Delete the post from database
+    await Post.findByIdAndDelete(postId);
+
+    // Remove post reference from user
+    const user = await User.findById(req.userId);
+    user.posts.pull(postId);
+    await user.save();
+    io.getIo().emit("posts", {
+      actions: "delete",
+      post: postId,
     });
+
+    res.status(200).json({
+      message: "Post deleted successfully",
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 /* delete image handler

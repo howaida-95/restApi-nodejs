@@ -21,6 +21,7 @@ exports.getPosts = async (req, res, next) => {
       .populate("creator")
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
+
     res.status(200).json({
       message: "Fetched posts successfully.",
       posts: posts,
@@ -128,75 +129,69 @@ exports.getPost = async (req, res, next) => {
 };
 
 exports.updatePost = async (req, res, next) => {
-  const postId = req.params.postId; // get the post id from the request parameters
-  const errors = validationResult(req); // check if there are any validation errors
-  if (!errors.isEmpty()) {
-    // 422 is the status code for unprocessable entity (validation error)
-    // send error response
-    const error = new Error("Validation failed, entered data is incorrect.");
-    error.statusCode = 422; // set the status code
-    throw error; // throw the error to be handled by the error handling middleware
-  }
+  try {
+    const postId = req.params.postId;
+    const errors = validationResult(req);
 
-  let imageUrl = req.body.image;
-  // parse data from incoming request
-  const title = req.body.title;
-  const content = req.body.content;
+    if (!errors.isEmpty()) {
+      const error = new Error("Validation failed, entered data is incorrect.");
+      error.statusCode = 422;
+      throw error;
+    }
 
-  // check if the request has a file (image) attached
-  if (req.file) {
-    // get the image URL from the request file
-    /*
-    if no image uplaoded then use the old image URL from the database
-    if image uploaded then use the new image URL from the request file
-    */
-    imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes for cross-platform compatibility
-  }
-  if (!imageUrl) {
-    // send error response
-    const error = new Error("No image provided.");
-    error.statusCode = 422; // unprocessable entity
-    throw error; // throw the error to be handled by the error handling middleware
-  }
-  // parse data from incoming request
-  // validate data
-  if (!title || !content) {
-    // send error response
-    return res.status(422).json({ message: "Invalid input" });
-  }
-  Post.findById(postId) // find the post by id in the database
-    .then((post) => {
-      if (!post) {
-        const error = new Error("Could not find post.");
-        error.statusCode = 404; // not found
-        throw error; // throw the error to be handled by the error handling middleware, so it will be caught by the catch block
-      }
-      if (post.creator.toString() !== req.userId) {
-        const error = new Error("Not authorized");
-        error.statusCode = 403; // forbidden
-        throw error; // throw the error to be handled by the error handling middleware
-      }
+    let imageUrl = req.body.image;
+    const title = req.body.title;
+    const content = req.body.content;
 
-      if (imageUrl !== post.imageUrl) {
-        // if the image URL has changed (new image uploaded)
-        clearImage(post.imageUrl); // delete the old image from the server
-      }
-      post.title = title; // update post title with new title from request body
-      post.content = content; // update post content with new content from request body
-      post.imageUrl = imageUrl; // update post image URL with new image URL from request file
+    if (req.file) {
+      imageUrl = req.file.path.replace("\\", "/");
+    }
 
-      // save updated post to database
-      return post.save(); // save updated post to database and return it as a promise
-    })
-    .then((result) => {
-      res.status(200).json({ message: "Post updated successfully", post: result }); // send success response with updated post data
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500; // internal server error
-      } // pass the error to the error handling middleware
-      next(err); // pass the error to the error handling middleware
+    if (!imageUrl) {
+      const error = new Error("No image provided.");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    if (!title || !content) {
+      return res.status(422).json({ message: "Invalid input" });
+    }
+
+    const post = await Post.findById(postId).populate("creator");
+
+    if (!post) {
+      const error = new Error("Could not find post.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (post.creator._id.toString() !== req.userId) {
+      const error = new Error("Not authorized");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (imageUrl !== post.imageUrl) {
+      clearImage(post.imageUrl);
+    }
+
+    post.title = title;
+    post.content = content;
+    post.imageUrl = imageUrl;
+
+    const result = await post.save();
+    io.getIo().emit("posts", {
+      action: "update",
+      post: { ...result._doc, creator: { _id: req.userId, name: result.creator.name } },
     });
+
+    res.status(200).json({ message: "Post updated successfully", post: result });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 exports.deletePost = async (req, res, next) => {

@@ -99,13 +99,14 @@ mongoose
     => store the server in the function returned by socket io 
     => websocket is built on top of http protocol
     */
-    const io = require("socket.io")(server, {
-      cors: {
-        origin: "*", // or specific domain like "http://localhost:3000"
-        methods: ["GET", "POST"],
-      },
-    });
-    // we can use it on couple of event listeners
+    const io = require("./socket").init(server);
+    /* 
+    ^  Happens every time a new client connects.
+    we can use it on couple of event listeners
+    Listens for new client connections.
+    Every time a client connects, the callback function runs, and a unique socket object is created for that specific client.
+    */
+
     io.on("connection", (socket) => {
       // socket is the connection between client & server
       // this function will executed

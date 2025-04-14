@@ -3,6 +3,7 @@ const Post = require("../models/post");
 const User = require("../models/user");
 const fs = require("fs"); // file system module to delete files
 const path = require("path"); // path module to handle file paths
+const io = require("../socket");
 
 exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1; // get the current page from the query string or default to 1
@@ -33,74 +34,75 @@ exports.getPosts = async (req, res, next) => {
 };
 
 exports.createPost = async (req, res, next) => {
-  // handle errors
-  const errors = validationResult(req); // check if there are any validation errors
-  if (!errors.isEmpty()) {
-    // 422 is the status code for unprocessable entity (validation error)
-    // send error response
-    const error = new Error("Validation failed, entered data is incorrect.");
-    error.statusCode = 422; // set the status code
-    throw error; // throw the error to be handled by the error handling middleware
-  }
+  try {
+    // handle errors
+    const errors = validationResult(req); // check if there are any validation errors
+    if (!errors.isEmpty()) {
+      // 422 is the status code for unprocessable entity (validation error)
+      const error = new Error("Validation failed, entered data is incorrect.");
+      error.statusCode = 422; // set the status code
+      throw error; // throw the error to be handled by the error handling middleware
+    }
 
-  // check if the request has a file (image) attached
-  if (!req.file) {
-    // send error response
-    const error = new Error("No image provided.");
-    error.statusCode = 422; // unprocessable entity
-    throw error; // throw the error to be handled by the error handling middleware
-  }
-  // get the image URL from the request file
-  const imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes for cross-platform compatibility
-  // parse data from incoming request
-  const title = req.body.title;
-  const content = req.body.content;
-  let creator;
-  // validate data
-  if (!title || !content) {
-    // send error response
-    return res.status(422).json({ message: "Invalid input" });
-  }
+    // check if the request has a file (image) attached
+    if (!req.file) {
+      const error = new Error("No image provided.");
+      error.statusCode = 422; // unprocessable entity
+      throw error;
+    }
 
-  // save data to database (simulated here with a console log)
-  // send response
-  // Creates a new Post document
-  const post = new Post({
-    title: title,
-    content: content,
-    imageUrl: imageUrl, // use the image URL from the request file
-    creator: req.userId,
-  });
-  post
-    .save()
-    .then((result) => {
-      /*
-      add the post to the user's posts array in the database
-      */
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      // updating user then save it to db
-      creator = user;
-      user.posts.push(post);
-      return user.save();
-    })
-    .then((result) => {
-      console.log(result); // result here is the user
-      res.status(201).json({
-        message: "Post created successfully",
-        post: post,
-        creator: { _id: creator._id, name: creator.name },
-      });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500; // internal server error
-      }
-      next(err); // pass the error to the error handling middleware
+    // get the image URL from the request file
+    const imageUrl = req.file.path.replace("\\", "/"); // replace backslashes with forward slashes
+
+    // parse data from incoming request
+    const { title, content } = req.body;
+
+    // validate data
+    if (!title || !content) {
+      const error = new Error("Invalid input");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    // Creates a new Post document
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+      creator: req.userId,
     });
-};
 
+    // Save the post to database
+    const savedPost = await post.save();
+
+    // Find the user and update their posts array
+    const user = await User.findById(req.userId);
+    user.posts.push(savedPost);
+    await user.save();
+    /*
+    inform other users that new post created 
+    before sending a response
+    - get the io object
+    - emit event to all connected users
+    => difference between emit and broadcast 
+    is that emit is used to send data to all connected users
+    while broadcast is used to send data to all connected users except the sender (for the one that sent the request)
+    .emit(event name, data to be sent)
+    */
+    io.getIo().emit("posts", { action: "create", post: savedPost });
+
+    res.status(201).json({
+      message: "Post created successfully",
+      post: savedPost,
+      creator: { _id: user._id, name: user.name },
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500; // internal server error
+    }
+    next(err); // pass the error to the error handling middleware
+  }
+};
 exports.getPost = async (req, res, next) => {
   const postId = req.params.postId; // get the post id from the request parameters
   // find the post by id in the database (simulated here with a console log)

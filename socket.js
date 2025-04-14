@@ -5,7 +5,12 @@ module.exports = {
   //Takes an HTTP server as input (usually created using http.createServer() or from an Express app).
   init: (httpServer) => {
     // Initializes the Socket.IO server by passing the HTTP server to it.
-    io = require("socket.io")(httpServer);
+    io = require("socket.io")(httpServer, {
+      cors: {
+        origin: "http://localhost:3000", // your frontend origin
+        methods: ["GET", "POST", "DELETE"],
+      },
+    });
     return io;
   },
 

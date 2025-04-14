@@ -18,6 +18,7 @@ exports.getPosts = async (req, res, next) => {
     // limit the number of posts to be displayed on the current page
     // note --> .exec (return a promise)
     const posts = await Post.find()
+      .populate("creator")
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
     res.status(200).json({
@@ -89,7 +90,10 @@ exports.createPost = async (req, res, next) => {
     while broadcast is used to send data to all connected users except the sender (for the one that sent the request)
     .emit(event name, data to be sent)
     */
-    io.getIo().emit("posts", { action: "create", post: savedPost });
+    io.getIo().emit("posts", {
+      action: "create",
+      post: { ...savedPost._doc, creator: { _id: req.userId, name: user.name } },
+    });
 
     res.status(201).json({
       message: "Post created successfully",

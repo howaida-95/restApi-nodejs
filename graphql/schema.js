@@ -5,27 +5,21 @@ const { buildSchema } = require("graphql");
 //         text: String!
 //         views: Int!
 //     }
-
 //     type RootQuery {
 //         hello: TestData!,
-
 //     }
-
 //     schema {
 //         query: RootQuery
 //     }
-
 // `);
 
 /* 
 input 
 -----
 data that use as argument --> we use input keyword
-
 type 
 ----
 what we get back after user created --> we use type keyword
-
 schema
 -------
 what we use to define the schema --> we use schema keyword
@@ -76,16 +70,12 @@ type RootQuery:
 contains all different queries 
 ! --> means it is required
 
-
-
 query: 
 object with all the queries
 queries are the parts that we get data 
 
-
 query field --> query type --> query resolver --> query resolver function
 mutation field --> mutation type --> mutation resolver --> mutation resolver function
-
 
 example 
 -----------

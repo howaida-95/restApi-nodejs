@@ -73,6 +73,7 @@ app.use((req, res, next) => {
 });
 /*
 we use app.use instead of app.post because we want to handle all the requests
+--> no routes , we only have one endpoint 
 */
 app.use(
   "/graphql",

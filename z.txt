@@ -101,6 +101,10 @@ to install simple server do the parsing of incoming request
 in app.js --> import express-graphql and use it to expose graphql service
 import express-graphql, schema , resolver
 
+note 
+----
+in rest api --> validation in routing (using express validator package)
+in graphql --> validation in resolvers (using validator package)
 
 =================================================================================
 test/id --> id is param (part of path, identify resource)

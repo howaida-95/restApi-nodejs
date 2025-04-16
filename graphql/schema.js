@@ -46,7 +46,7 @@ module.exports = buildSchema(`
         name: String!
         email: String!
         password: String
-        Status: String!
+        status: String!
         posts: [Post!]!
     }
 

@@ -81,6 +81,27 @@ use socket io instance to emit and listen to events
 const socket = openSocket("http://localhost:8080")
 socket.on(event name, callback function) --> called when new user emit event
 
+*******************************************************************************************
+graphQl
+=======
+- packages used 
+---------------->
+1- graphQl:
+required for defining schema for graphql service like: definition of queries, mutations ..etc 
+- express-graphql 
+to install simple server do the parsing of incoming request 
+ steps 
+ -----
+- graphQl folder /
+-> schema file --> define schema for graphql service
+-> resolvers --> define functions to resolve queries and mutations
+
+2. express-graphql 
+## now we need to expose it to the public by  express-graphql
+in app.js --> import express-graphql and use it to expose graphql service
+import express-graphql, schema , resolver
+
+
 =================================================================================
 test/id --> id is param (part of path, identify resource)
 test?id=1 --> id is query param (query string, filter data or search or pagination ...etc)

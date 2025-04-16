@@ -4,15 +4,16 @@ const express = require("express");
 // Import the body-parser middleware for parsing request bodies
 const bodyParser = require("body-parser");
 const multer = require("multer"); // Import the multer middleware for handling file uploads
-// Import the feed routes from the routes directory
-const feedRoutes = require("./routes/feed");
-// Import the auth routes from the routes directory
-const authRoutes = require("./routes/auth");
+
 // import the mongoose library for MongoDB object modeling
 const mongoose = require("mongoose");
+const { graphqlHTTP } = require('express-graphql');
+const graphqlSchema = require("./graphql/schema");
+const graphqlResolver = require("./graphql/resolvers");
 
 // Create an instance of an Express application
 const app = express();
+
 /*
 Configure multer for file uploads
 => multer is a middleware for handling multipart/form-data, which is used for uploading files.
@@ -70,8 +71,22 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Allow specific headers in requests
   next(); // Call the next middleware or route handler
 });
-app.use("/feed", feedRoutes);
-app.use("/auth", authRoutes); // Use the auth routes for authentication-related requests
+/*
+we use app.use instead of app.post because we want to handle all the requests
+*/
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    /*
+  configuration
+  -> needs 2 items to work 
+    1. schema: the schema of the GraphQL API
+    2. rootValue --> points to resolver 
+  */
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+  })
+);
 
 // Error handling middleware to catch errors and send a response
 app.use((error, req, res, next) => {
@@ -92,26 +107,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    // Start the server and listen on the specified port
-    // The callback function logs a message when the server starts successfully
-    const server = app.listen(8080);
-    /* setting up socket io
-    => store the server in the function returned by socket io 
-    => websocket is built on top of http protocol
-    */
-    const io = require("./socket").init(server);
-    /* 
-    ^  Happens every time a new client connects.
-    we can use it on couple of event listeners
-    Listens for new client connections.
-    Every time a client connects, the callback function runs, and a unique socket object is created for that specific client.
-    */
-
-    io.on("connection", (socket) => {
-      // socket is the connection between client & server
-      // this function will executed
-      console.log("Client connected");
-    });
+    app.listen(8080);
   })
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);

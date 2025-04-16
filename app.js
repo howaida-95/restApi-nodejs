@@ -7,7 +7,7 @@ const multer = require("multer"); // Import the multer middleware for handling f
 
 // import the mongoose library for MongoDB object modeling
 const mongoose = require("mongoose");
-const { graphqlHTTP } = require('express-graphql');
+const { graphqlHTTP } = require("express-graphql");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
 
@@ -85,6 +85,7 @@ app.use(
   */
     schema: graphqlSchema,
     rootValue: graphqlResolver,
+    graphiql: true, // Enable GraphiQL in the browser
   })
 );
 

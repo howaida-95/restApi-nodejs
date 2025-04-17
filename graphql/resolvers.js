@@ -29,7 +29,9 @@ module.exports = {
 
     if (errors.length > 0) {
       const error = new Error("invalid input");
-      throw error;// throw error to be caught by the error handler
+      error.data = errors; // array of errors
+      error.code = 422; // unprocessable entity
+      throw error; // throw error to be caught by the error handler
     }
 
     // check if the user exists
@@ -38,9 +40,10 @@ module.exports = {
       throw new Error("User already exists");
     }
 
-    /* create a new user
-    1- hash the user 
-    2- create a new user with the hashed password
+    /* 
+      create a new user
+        1- hash the user 
+        2- create a new user with the hashed password
     */
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({

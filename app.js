@@ -87,6 +87,20 @@ app.use(
     schema: graphqlSchema,
     rootValue: graphqlResolver,
     graphiql: true, // Enable GraphiQL in the browser
+    // format the error
+    formatError: (err) => {
+      /*
+      original error will be set by express-graphql 
+      if technical error like a missing character in query -> there will be no original error
+      */
+      if (!err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || "An error occurred";
+      const code = err.originalError.code || 500;
+      return { message: message, status: code, data: data };
+    },
   })
 );
 

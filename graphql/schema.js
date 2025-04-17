@@ -55,7 +55,7 @@ module.exports = buildSchema(`
     }
 
     type RootQuery {
-        hello: String
+        login(email: String!, )L : User!
     }
 
     schema {

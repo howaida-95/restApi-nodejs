@@ -3,6 +3,7 @@ const User = require("../models/User");
 // to hash the password
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   //   hello() {
@@ -56,6 +57,43 @@ module.exports = {
     return {
       ...createdUser._doc,
       _id: createdUser._id.toString(), //convert id obj into string
+    };
+  },
+
+  /*
+  => existing user by finding the user by email
+  => check if the password is correct by comparing the hashed password with the entered password
+  => token is created using the jwt.sign method 
+  which takes the user id and email as payload and a secret key and an expiration time
+
+*/
+  login: async (args, req) => {
+    const { email, password } = args;
+    // check if the user exists
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) {
+      const error = new Error("User does not exist");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+    // check if the password is correct
+    const isEqual = await bcrypt.compare(password, existingUser.password);
+    if (!isEqual) {
+      const error = new Error("Password is incorrect");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+    // create a token
+    const token = jwt.sign(
+      { userId: existingUser._id.toString(), email: existingUser.email },
+      "somesupersecretsecret",
+      { expiresIn: "1h" } // expires in 1 hour
+    );
+
+    return {
+      userId: existingUser._id.toString(),
+      token: token,
+      tokenExpiration: 1, // 1 hour
     };
   },
 };

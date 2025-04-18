@@ -56,12 +56,21 @@ module.exports = buildSchema(`
         tokenExpiration: Int!
     }
 
+    type PostInputData{
+        title: String!
+        content: String!
+        imageUrl: String
+    }
+
+
     type RootMutation {
         createUser(userInput: userInputData!) : User!
     }
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
+        createPost(postInput: PostInputData!): Post!
+        posts: [Post!]!
     }
 
     schema {

@@ -1,5 +1,6 @@
 // import mongoose user model
 const User = require("../models/User");
+const Post = require("../models/Post");
 // to hash the password
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
@@ -96,4 +97,81 @@ module.exports = {
       tokenExpiration: 1, // 1 hour
     };
   },
+
+  /*
+  1- validation 
+  2- create new post & save it to the database
+  3- add the post to the user and save the user
+  4- return the created post
+  */
+
+  createPost: async (args, req) => {
+    const { title, content, imageUrl } = args.postInput;
+    // Validate title, content, imageUrl
+    validateField("title", title);
+    validateField("content", content);
+
+    if (validator.isEmpty(imageUrl)) {
+      errors.push({
+        field: "imageUrl",
+        message: "Image URL is required",
+      });
+    }
+
+    if (validator.isEmpty(imageUrl)) {
+      errors.push({
+        message: "Image URL is required",
+      });
+    }
+
+    if (errors.length > 0) {
+      const error = new Error("invalid input");
+      error.data = errors; // array of errors
+      error.code = 422; // unprocessable entity
+      throw error; // throw error to be caught by the error handler
+    }
+
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+      creator: req.userId,
+    });
+    const createdPost = await post.save(); // this returned the created post
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    user.posts.push(createdPost); // add the post to the user
+    await user.save(); // save the user with the new post
+
+    return {
+      ...createdPost._doc,
+      //convert id obj into string
+      _id: createdPost._id.toString(),
+      // overWrite created at & updated at
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: createdPost.updatedAt.toISOString(),
+    };
+  },
+};
+
+const validateField = (fieldName, value, minLength = 5) => {
+  if (validator.isEmpty(value)) {
+    errors.push({
+      field: fieldName,
+      message: `${fieldName} is required`,
+    });
+  } else if (!validator.isLength(value, { min: minLength })) {
+    errors.push({
+      field: fieldName,
+      message: `${fieldName} should be at least ${minLength} characters long`,
+    });
+  }
 };

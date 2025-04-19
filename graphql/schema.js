@@ -76,6 +76,7 @@ module.exports = buildSchema(`
         login(email: String!, password: String!): AuthData!
         posts(page: Int): postData!
     }
+    
     schema {
         query: RootQuery
         mutation: RootMutation

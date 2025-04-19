@@ -6,6 +6,20 @@ const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
+const validateField = (fieldName, value, minLength = 5) => {
+  if (validator.isEmpty(value)) {
+    errors.push({
+      field: fieldName,
+      message: `${fieldName} is required`,
+    });
+  } else if (!validator.isLength(value, { min: minLength })) {
+    errors.push({
+      field: fieldName,
+      message: `${fieldName} should be at least ${minLength} characters long`,
+    });
+  }
+};
+
 module.exports = {
   //   hello() {
   //     return {
@@ -160,18 +174,39 @@ module.exports = {
       updatedAt: createdPost.updatedAt.toISOString(),
     };
   },
-};
 
-const validateField = (fieldName, value, minLength = 5) => {
-  if (validator.isEmpty(value)) {
-    errors.push({
-      field: fieldName,
-      message: `${fieldName} is required`,
-    });
-  } else if (!validator.isLength(value, { min: minLength })) {
-    errors.push({
-      field: fieldName,
-      message: `${fieldName} should be at least ${minLength} characters long`,
-    });
-  }
+  /*
+  1- check if the user is authenticated
+  2- pagination data 
+  3- get all posts from the database 
+  */
+  posts: async (args, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+
+    const currentPage = args.page || 1; // current page
+    const perPage = 2; // posts per page
+    const totalPosts = await Post.find().countDocuments(); // total posts
+
+    const posts = await Post.find()
+      .sort({ createdAt: -1 }) // sort by createdAt in descending order
+      .skip((currentPage - 1) * perPage) // skip the posts of the previous pages
+      .limit(perPage) // limit the number of posts to perPage
+      .populate("creator"); // populate the creator field with the user data
+
+    return {
+      posts: posts.map((post) => {
+        return {
+          ...post._doc,
+          _id: post._id.toString(),
+          createdAt: post.createdAt.toISOString(),
+          updatedAt: post.updatedAt.toISOString(),
+        };
+      }),
+      totalPosts: totalPosts,
+    };
+  },
 };

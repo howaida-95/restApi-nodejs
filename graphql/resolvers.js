@@ -118,12 +118,7 @@ module.exports = {
     validateField("title", title);
     validateField("content", content);
 
-    if (validator.isEmpty(imageUrl)) {
-      errors.push({
-        field: "imageUrl",
-        message: "Image URL is required",
-      });
-    }
+    const errors = [];
 
     if (validator.isEmpty(imageUrl)) {
       errors.push({
@@ -138,20 +133,21 @@ module.exports = {
       throw error; // throw error to be caught by the error handler
     }
 
-    const post = new Post({
-      title: title,
-      content: content,
-      imageUrl: imageUrl,
-      creator: req.userId,
-    });
-    const createdPost = await post.save(); // this returned the created post
-
     const user = await User.findById(req.userId);
     if (!user) {
       const error = new Error("user not found");
       error.code = 401;
       throw error; // throw error to be caught by the error handler
     }
+
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+      creator: user,
+    });
+    const createdPost = await post.save(); // this returned the created post
+
     user.posts.push(createdPost); // add the post to the user
     await user.save(); // save the user with the new post
 

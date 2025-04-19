@@ -99,14 +99,21 @@ module.exports = {
   },
 
   /*
-  1- validation 
-  2- create new post & save it to the database
-  3- add the post to the user and save the user
-  4- return the created post
+    1- check if the user is authenticated 
+    2- validation 
+    3- create new post & save it to the database
+    4- add the post to the user and save the user
+    5- return the created post
   */
 
   createPost: async (args, req) => {
     const { title, content, imageUrl } = args.postInput;
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+
     // Validate title, content, imageUrl
     validateField("title", title);
     validateField("content", content);
@@ -131,11 +138,6 @@ module.exports = {
       throw error; // throw error to be caught by the error handler
     }
 
-    if (!req.isAuth) {
-      const error = new Error("Not authenticated");
-      error.code = 401; // unauthorized
-      throw error;
-    }
     const post = new Post({
       title: title,
       content: content,
@@ -146,7 +148,9 @@ module.exports = {
 
     const user = await User.findById(req.userId);
     if (!user) {
-      throw new Error("User not found");
+      const error = new Error("user not found");
+      error.code = 401;
+      throw error; // throw error to be caught by the error handler
     }
     user.posts.push(createdPost); // add the post to the user
     await user.save(); // save the user with the new post

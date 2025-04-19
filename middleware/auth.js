@@ -5,12 +5,14 @@ module.exports = (req, res, next) => {
     // Extract token from Authorization header: "Bearer <token>"
     const authHeader = req.get("Authorization");
     if (!authHeader) {
-      return res.status(401).json({ message: "Authorization header missing" });
+      req.isAuth = false; // No token provided
+      return next();
     }
 
     const token = authHeader.split(" ")[1]; // Get the token part (bearer + space + token)
     if (!token) {
-      return res.status(401).json({ message: "Token not provided" });
+      req.isAuth = false; // No token provided
+      return next();
     }
 
     // Verify the token
@@ -18,11 +20,12 @@ module.exports = (req, res, next) => {
 
     // Optionally, attach decoded payload to request object
     req.userId = decoded?.userId;
+    req.isAuth = true; // No token provided
 
     // Proceed to next middleware/controller
     next();
   } catch (err) {
-    console.error("Token verification failed:", err.message);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    req.isAuth = false; // No token provided
+    return next();
   }
 };

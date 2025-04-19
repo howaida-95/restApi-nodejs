@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 const { graphqlHTTP } = require("express-graphql");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
+const auth = require("./middleware/auth"); // Import the authentication middleware
 
 // Create an instance of an Express application
 const app = express();
@@ -74,6 +75,14 @@ app.use((req, res, next) => {
   }
   next(); // Call the next middleware or route handler
 });
+/*
+this middleware will run for every request that reaches graphql endpoint
+but not denies the request if the user is not authenticated
+all what it does is --> isAuth: false 
+then in resolver we decide to continue or not 
+*/
+app.use(auth);
+
 /*
 we use app.use instead of app.post because we want to handle all the requests
 --> no routes , we only have one endpoint 

@@ -74,9 +74,8 @@ module.exports = buildSchema(`
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        posts: postData!
+        posts(page: Int): postData!
     }
-
     schema {
         query: RootQuery
         mutation: RootMutation
@@ -85,8 +84,7 @@ module.exports = buildSchema(`
 
 /*
 type RootQuery:
-contains all different queries 
-! --> means it is required
+contains all different queries ! --> means it is required
 
 query: 
 object with all the queries

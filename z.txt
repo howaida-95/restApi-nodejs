@@ -105,7 +105,7 @@ note
 ----
 in rest api --> validation in routing (using express validator package)
 in graphql --> validation in resolvers (using validator package)
-
+we can use rest api & graphql together in same app
 =================================================================================
 test/id --> id is param (part of path, identify resource)
 test?id=1 --> id is query param (query string, filter data or search or pagination ...etc)

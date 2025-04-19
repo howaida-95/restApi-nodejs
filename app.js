@@ -1,4 +1,5 @@
 const path = require("path"); // Import the path module for handling file and directory paths
+const fs = require("fs"); // Import the file system module for file operations
 // Import the Express framework for building web applications
 const express = require("express");
 // Import the body-parser middleware for parsing request bodies
@@ -83,6 +84,24 @@ then in resolver we decide to continue or not
 */
 app.use(auth);
 
+// Define the GraphQL endpoint for handling image uploads with put request
+app.put("/post-image", (req, res, next) => {
+  if (!req.isAuth) {
+    // If the user is not authenticated, return an error response
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  // If the user is authenticated, proceed with the image upload
+  if (!req.file) {
+    // If no file is provided, return an error response
+    return res.status(200).json({ message: "No file provided" });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath); // delete the old image if it exists
+  }
+  // If a file is provided, return a success response with the file path
+  return res.status(201).json({ message: "File stored", filePath: req.file.path });
+});
+
 /*
 we use app.use instead of app.post because we want to handle all the requests
 --> no routes , we only have one endpoint 
@@ -141,3 +160,10 @@ mongoose
     console.error("Error connecting to MongoDB:", err);
   });
 // Define the port number the server will listen on
+
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, "..", filePath); // join the directory name with the file path
+  fs.unlink(filePath, (err) => {
+    console.log(err); // log any error that occurs while deleting the file
+  });
+};

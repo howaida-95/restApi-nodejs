@@ -15,7 +15,7 @@ const auth = require("./middleware/auth"); // Import the authentication middlewa
 
 // Create an instance of an Express application
 const app = express();
-
+const { clearImage } = require("./util/file"); // Import the clearImage function for deleting images
 /*
 Configure multer for file uploads
 => multer is a middleware for handling multipart/form-data, which is used for uploading files.
@@ -160,10 +160,3 @@ mongoose
     console.error("Error connecting to MongoDB:", err);
   });
 // Define the port number the server will listen on
-
-const clearImage = (filePath) => {
-  filePath = path.join(__dirname, "..", filePath); // join the directory name with the file path
-  fs.unlink(filePath, (err) => {
-    console.log(err); // log any error that occurs while deleting the file
-  });
-};

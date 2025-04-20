@@ -337,4 +337,62 @@ module.exports = {
 
     return true; // return true if the post is deleted successfully
   },
+
+  /*
+  1- check if the user is authenticated
+  2- get the user by id from the database
+  3- check if the user is the creator of the post
+  4- return the user
+  */
+  user: async (args, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+    const userId = req.userId;
+    const user = await User.findById(userId).populate("posts"); // populate the posts field with the post data
+    if (!user) {
+      const error = new Error("User not found");
+      error.code = 404; // not found
+      throw error; // throw error to be caught by the error handler
+    }
+
+    return {
+      ...user._doc,
+      _id: user._id.toString(), //convert id obj into string
+    };
+  },
+
+  /*
+  1- check if the user is authenticated
+  2- get the user by id from the database
+  3- check if the user is the creator of the post
+  4- return the user
+  */
+
+  updateStatus: async (args, req) => {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated");
+      error.code = 401; // unauthorized
+      throw error;
+    }
+    const userId = req.userId;
+    const status = args.status;
+
+    const user = await User.findById(userId); // get the user who created the post
+    if (!user) {
+      const error = new Error("User not found");
+      error.code = 404; // not found
+      throw error; // throw error to be caught by the error handler
+    }
+
+    user.status = status; // update the status of the user
+    await user.save(); // save the user with the new status
+
+    return {
+      ...user._doc,
+      _id: user._id.toString(), //convert id obj into string
+    };
+  },
 };

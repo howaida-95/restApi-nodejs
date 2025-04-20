@@ -81,7 +81,7 @@ module.exports = buildSchema(`
         post(id: ID!): Post!
         user: User!
     }
-    
+
     schema {
         query: RootQuery
         mutation: RootMutation

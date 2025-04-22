@@ -65,3 +65,10 @@ after all routes
 ================================
 test/id --> id is param (part of path, identify resource)
 test?id=1 --> id is query param (query string, filter data or search or pagination ...etc)
+
+========================================================================
+testing 
+- mocha: used for unit testing and integration testing in node js apps
+- chai: used for assertion library in mocha tests
+*********
+mocha: look for folder called test
